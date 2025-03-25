@@ -10,9 +10,8 @@ public class StockFeeder {
     // TODO: Implement Singleton pattern
     private StockFeeder() {}
 
-    // Double-check synchronization for thread safety
     public static StockFeeder getInstance() {
-        // TODO: Implement Singleton logic
+        // Double-check synchronization for thread safety
         if (instance == null) {
             synchronized (StockFeeder.class) {
                 if (instance == null) {
@@ -25,48 +24,79 @@ public class StockFeeder {
     }
 
     public void addStock(Stock stock) {
-        // TODO: Implement adding a stock to stockList
-        stockList.add(stock);
-        viewers.computeIfAbsent(stock.getCode(), k -> new ArrayList<>());
-        // String code = stock.getCode();
-        // if (!viewers.containsKey(code)) {
-        //     stockList.add(stock);
-        //     viewers.put(stock.getCode(), new ArrayList<>());
-        // }
-    }
+        Objects.requireNonNull(stock, "[ERROR] Stock can not be null");
+        String code = stock.getCode();
 
+        if(!stockList.contains(stock)) {
+            stockList.add(stock);
+            viewers.computeIfAbsent(code, k -> new ArrayList<>());
+        } else {
+            System.out.printf("[ERROR] Stock %s already exists!\n", code);
+        }
+    } 
+    
     public void registerViewer(String code, StockViewer stockViewer) {
-        // TODO: Implement registration logic, including checking stock existence
+        Objects.requireNonNull(code, "[ERROR] Stock can not be null");
+        Objects.requireNonNull(stockViewer, "[ERROR] StockViewer cannot be null");
+    
         if(!viewers.containsKey(code)) {
             Logger.errorRegister(code);
             return;
         }
+    
+        List<StockViewer> viewers_list = viewers.get(code);
+        boolean duplicate = false;
+    
+        for (StockViewer existingViewer : viewers_list) {
+            // Compare based on the class type
+            if (existingViewer.getClass().equals(stockViewer.getClass())) {
+                // Special case for StockAlertView: Compare thresholds
+                if (stockViewer instanceof StockAlertView) {
+                    StockAlertView existingAlert = (StockAlertView) existingViewer;
+                    StockAlertView newAlert = (StockAlertView) stockViewer;
 
-        List<StockViewer> stockViewers = viewers.get(code);
-        // Prevent duplicate registrations
-        if (stockViewers.contains(stockViewer)) {
-            return; 
+                    if (existingAlert.getThresholdHigh() == newAlert.getThresholdHigh() && existingAlert.getThresholdLow() == newAlert.getThresholdLow()) {
+                        duplicate = true;
+                        break;
+                    }
+                } else { 
+                    duplicate = true;
+                    break;
+                }
+            }
         }
     
-        stockViewers.add(stockViewer);
-    }    
+        if (duplicate) {
+            Logger.errorRegister(code);
+        } else {
+            viewers_list.add(stockViewer);
+            System.out.printf("[INFO] Viewer registered for stock %s\n", code);
+        }
+    }
 
     public void unregisterViewer(String code, StockViewer stockViewer) {
-        // TODO: Implement unregister logic, including error logging
-        if(!viewers.containsKey(code) || !viewers.get(code).contains(stockViewer)) {
+        Objects.requireNonNull(code, "[ERROR] Stock can not be null");
+        Objects.requireNonNull(stockViewer, "[ERROR] StockViewer cannot be null");
+
+        if (!viewers.containsKey(code)) {
             Logger.errorUnregister(code);
             return;
         }
-
-        viewers.get(code).remove(stockViewer);
+    
+        List<StockViewer> viewers_list = viewers.get(code);    
+        if (viewers_list.remove(stockViewer)) {
+            System.out.printf("[INFO] Viewer unregistered for stock %s\n", code);
+        } else {
+            Logger.errorUnregister(code);
+        }
     }
 
     public void notify(StockPrice stockPrice) {
-        // TODO: Implement notifying registered viewers about price updates
         String code = stockPrice.getCode();
 
         if(viewers.containsKey(code)) {
-            for(StockViewer viewer : viewers.get(code)) {
+            List<StockViewer> viewers_list = viewers.get(code);
+            for(StockViewer viewer : viewers_list) {
                 viewer.onUpdate(stockPrice);
             }
         }

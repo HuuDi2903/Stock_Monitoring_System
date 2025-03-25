@@ -9,6 +9,7 @@ public class StockTickerView implements StockViewer {
     private final Map<String, StockData> stockDataMap = new HashMap<>();
 
     public StockTickerView() {
+        System.out.println("[DEBUG] StockTickerView created");
         Timer timer = new Timer(true);
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override

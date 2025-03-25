@@ -21,12 +21,12 @@ public class StockAlertView implements StockViewer {
         double price = stockPrice.getAvgPrice();
         
         if (price > alertThresholdHigh) {
-        // Check if this alert is different from the last one
+            // Check if this alert is different from the last one
             if (!lastAlertedPrices.containsKey(stockCode) || lastAlertedPrices.get(stockCode) != price) {
                 alertAbove(stockCode, price);
             }
         } else if (price < alertThresholdLow) {
-
+            // Check if this alert is different from the last one
             if (!lastAlertedPrices.containsKey(stockCode) || lastAlertedPrices.get(stockCode) != price) {
                 alertBelow(stockCode, price);
             }
@@ -37,7 +37,7 @@ public class StockAlertView implements StockViewer {
         // TODO: Call Logger to log the alert
         // Logger.notImplementedYet("alertAbove");
         lastAlertedPrices.put(stockCode, price);
-        System.out.println("-------ABOVE THRESHOLD ALERT-------");
+        System.out.println("--------------ABOVE THRESHOLD ALERT--------------");
         Logger.logAlert(stockCode, price);
     }
 
@@ -45,7 +45,15 @@ public class StockAlertView implements StockViewer {
         // TODO: Call Logger to log the alert
         // Logger.notImplementedYet("alertBelow");
         lastAlertedPrices.put(stockCode, price);
-        System.out.println("-------BELOW THRESHOLD ALERT-------");
+        System.out.println("--------------BELOW THRESHOLD ALERT--------------");
         Logger.logAlert(stockCode, price);
+    }
+
+    public double getThresholdHigh() {
+        return alertThresholdHigh;
+    }
+
+    public double getThresholdLow() {
+        return alertThresholdLow;
     }
 }
