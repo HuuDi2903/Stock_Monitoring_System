@@ -14,7 +14,6 @@ public class StockRealtimePriceView implements StockViewer {
         if (!lastPrices.containsKey(stockCode)) {
             // First time updating for this stock
             lastPrices.put(stockCode, newPrice);
-            Logger.logRealtime(stockCode, newPrice);
         } else {
             double lastPrice = lastPrices.get(stockCode);
             // Update if the price has changed

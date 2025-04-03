@@ -43,34 +43,15 @@ public class StockFeeder {
             Logger.errorRegister(code);
             return;
         }
-    
-        List<StockViewer> viewers_list = viewers.get(code);
-        boolean duplicate = false;
-    
-        for (StockViewer existingViewer : viewers_list) {
-            // Compare based on the class type
-            if (existingViewer.getClass().equals(stockViewer.getClass())) {
-                // Special case for StockAlertView: Compare thresholds
-                if (stockViewer instanceof StockAlertView) {
-                    StockAlertView existingAlert = (StockAlertView) existingViewer;
-                    StockAlertView newAlert = (StockAlertView) stockViewer;
 
-                    if (existingAlert.getThresholdHigh() == newAlert.getThresholdHigh() && existingAlert.getThresholdLow() == newAlert.getThresholdLow()) {
-                        duplicate = true;
-                        break;
-                    }
-                } else { 
-                    duplicate = true;
-                    break;
-                }
-            }
-        }
+        List<StockViewer> viewers_list = viewers.get(code);
     
-        if (duplicate) {
+        // Only check for exact same object instance (optional)
+        if (viewers_list.contains(stockViewer)) {
             Logger.errorRegister(code);
         } else {
             viewers_list.add(stockViewer);
-            System.out.printf("[INFO] Viewer registered for stock %s\n", code);
+            // System.out.printf("[INFO] Viewer registered for stock %s\n", code);
         }
     }
 
@@ -85,7 +66,7 @@ public class StockFeeder {
     
         List<StockViewer> viewers_list = viewers.get(code);    
         if (viewers_list.remove(stockViewer)) {
-            System.out.printf("[INFO] Viewer unregistered for stock %s\n", code);
+            // System.out.printf("[INFO] Viewer unregistered for stock %s\n", code);
         } else {
             Logger.errorUnregister(code);
         }
