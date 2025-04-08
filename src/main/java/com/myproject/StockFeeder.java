@@ -24,7 +24,6 @@ public class StockFeeder {
     }
 
     public void addStock(Stock stock) {
-        Objects.requireNonNull(stock, "[ERROR] Stock can not be null");
         String code = stock.getCode();
 
         if(!stockList.contains(stock)) {
@@ -36,8 +35,7 @@ public class StockFeeder {
     } 
     
     public void registerViewer(String code, StockViewer stockViewer) {
-        Objects.requireNonNull(code, "[ERROR] Stock can not be null");
-        Objects.requireNonNull(stockViewer, "[ERROR] StockViewer cannot be null");
+        if(stockViewer == null) Logger.errorRegister(code);    
     
         if(!viewers.containsKey(code)) {
             Logger.errorRegister(code);
@@ -45,19 +43,22 @@ public class StockFeeder {
         }
 
         List<StockViewer> viewers_list = viewers.get(code);
-    
-        // Only check for exact same object instance (optional)
-        if (viewers_list.contains(stockViewer)) {
+
+        /*
+         1. One code can have different viewers
+         2. One code cannot have same type of viewer
+         */
+        boolean hasSameTypeViewer = viewers_list.stream().anyMatch(viewer -> viewer.getClass() == stockViewer.getClass());       
+
+        if (hasSameTypeViewer) {
             Logger.errorRegister(code);
         } else {
             viewers_list.add(stockViewer);
-            // System.out.printf("[INFO] Viewer registered for stock %s\n", code);
         }
     }
 
     public void unregisterViewer(String code, StockViewer stockViewer) {
-        Objects.requireNonNull(code, "[ERROR] Stock can not be null");
-        Objects.requireNonNull(stockViewer, "[ERROR] StockViewer cannot be null");
+        if(stockViewer == null) Logger.errorUnregister(code);   
 
         if (!viewers.containsKey(code)) {
             Logger.errorUnregister(code);
@@ -66,7 +67,6 @@ public class StockFeeder {
     
         List<StockViewer> viewers_list = viewers.get(code);    
         if (viewers_list.remove(stockViewer)) {
-            // System.out.printf("[INFO] Viewer unregistered for stock %s\n", code);
         } else {
             Logger.errorUnregister(code);
         }
